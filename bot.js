@@ -1,0 +1,100 @@
+var Discord = require('discord.io');
+
+var auth = require('./auth.json');
+
+var winston = require('winston');
+
+var logger = winston.createLogger({
+    level: 'debug',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.printf(info => {
+            return `${info.timestamp} ${info.level}: ${info.message}`;
+        })
+    ),
+    transports: [new winston.transports.Console()]
+});
+
+// Initialize Discord Bot
+var bot = new Discord.Client({
+   token: auth.token,
+   autorun: true
+});
+bot.on('ready', function (evt) {
+    logger.info('Connected');
+    logger.info('Logged in as: ');
+    logger.info(bot.username + ' - (' + bot.id + ')');
+});
+bot.on('message', function (user, userID, channelID, message, evt) {
+    // Our bot needs to know if it will execute a command
+    // It will listen for messages that will start with `!`
+    if (message.substring(0, 1) == '!') {
+        var args = message.substring(1).split(' ');
+        var cmd = args[0];
+       
+        args = args.splice(1);
+        switch(cmd) {
+            case 'beer':
+				var today = new Date();
+				if ((today.getDay() == 5) && (today.getHours() >= 16)) {
+					send_message_to_discord('It\'s friday and it\'s after 16h, so the chances are that you could drink a beer and get away with it!', channelID);
+				} else {
+					send_message_to_discord('It\'s not yet friday 16h! Drink water or something!', channelID);
+				}
+            break;
+			case 'jira':
+				var action = args[0];
+				var ticket = args[1];
+				
+				switch(action) {
+					case 'to_do':
+					case 'td':
+						if (args.length == 2) {
+							var base_url = 'http://jira.adhese.org/rest/api/latest/issue/AD-' + ticket;
+							logger.info('base_url is ' + base_url);
+							send_message_to_discord('Moving ticket #' + ticket + ' to to_do status!', channelID);
+						}
+					break;
+					case 'in_progress':
+					case 'ip':
+						send_message_to_discord('Moving ticket #' + ticket + ' to in_progress status!', channelID);
+					break;
+					case 'code_review':
+					case 'cr':
+						send_message_to_discord('Moving ticket #' + ticket + ' to code_review status!', channelID);
+					break;
+					case 'functional_review':
+					case 'fr':
+						send_message_to_discord('Moving ticket #' + ticket + ' to functional_review status!', channelID);
+					break;
+					case 'assign':
+						var assignee = args[2];
+						var json = '{"fields": {"assignee":{"name":"' + assignee + '"}}}';
+						send_message_to_discord('Assigning ticket #' + ticket + ' to ' + assignee + '!', channelID);
+					break;
+					case 'done':
+						send_message_to_discord('Moving ticket #' + ticket + ' to done status!', channelID);
+					break;
+					case 'help':
+						send_message_to_discord('Possible commands:\n!jira to_do <ticket_number>: moves ticket to to_do status\n'
+							+ '!jira in_progress <ticket_number>: moves ticket to in_progress status\n'
+							+ '!jira code_review <ticket_number>: moves ticket to code_review status\n'
+							+ '!jira functional_review <ticket_number>: moves ticket to functional_review status\n'
+							+ '!jira assign <ticket_number> <assignee>: assigns ticket to assignee\n'
+							+ '!jira done <ticket_number>: moves ticket to done status', channelID);
+					break;
+					default:
+						send_message_to_discord('I do not recognize your command: ' + action + ' ; Type !jira help to see a list of possible commands', channelID);
+					break;
+				}
+			break;
+         }
+     }
+});
+
+function send_message_to_discord(message_to_display, channelID) {
+	bot.sendMessage({
+		to:channelID,
+		message: '```' + message_to_display + '```'
+	});
+}
