@@ -1,12 +1,12 @@
-FROM debian:jessie
+FROM alpine:latest
 
-RUN apt-get update \
-	&& apt-get install -y node \
+RUN apk update \
+	&& apk add --update nodejs nodejs-npm \
 	&& mkdir -p /root/
 	
-COPY files/auth.json /root/auth.json
-COPY files/package.json /root/package.json
-COPY files/bot.js /root/bot.js
+COPY auth.json /root/auth.json
+COPY package.json /root/package.json
+COPY bot.js /root/bot.js
 
 RUN cd /root/ \
 	&& npm install discord.io winston \
