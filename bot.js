@@ -5,8 +5,10 @@ var auth = require('./auth.json');
 var winston = require('winston');
 
 var PAUL = '492601218313748480';
-var BOBS = ['248152313410093057', '157606631293714432', '492601758003232788s'];
+var BOBS = ['248152313410093057', '157606631293714432', '492601758003232788'];
 var ONZINCHAT = '492600858081624064';
+
+var TIME = {};
 
 var logger = winston.createLogger({
     level: 'debug',
@@ -55,6 +57,16 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 			case 'onzin':
 				send_raw_message_to_discord('***Not the <#' + ONZINCHAT + '>*** chat', channelID);
 				break;
+			case 'timer': 
+				if (TIME.user == undefined || TIME.user == null) {
+					TIME.user = new Date().getTime();
+					send_message_to_discord('Starting timer for ' + user, channelID);
+				} else {
+					var DELTA = new Date().getTime() - TIME.user;
+					TIME.user = null;
+					send_message_to_discord(DELTA + ' millies have passed for user ' + user, channelID);
+				}
+				break;
 			case 'jira':
 				var action = args[0];
 				var ticket = args[1];
@@ -102,9 +114,11 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 				}
 			break;
          }
-     } else if (message.toLowerCase().includes("permission") && channelID != ONZINCHAT) {
-		tag(PAUL, channelID);
-	 }
+		} else if (message.toLowerCase().includes("permission") && channelID != ONZINCHAT) {
+			tag(PAUL, channelID);
+		} else if (message == '#suckstobeyou') {
+			send_message_to_discord('Haha', channelID);
+		}
 });
 
 function send_message_to_discord(message_to_display, channelID) {
