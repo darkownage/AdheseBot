@@ -5,7 +5,8 @@ var auth = require('./auth.json');
 var winston = require('winston');
 
 var PAUL = '492601218313748480';
-var BOBS = ['248152313410093057', '157606631293714432'];
+var BOBS = ['248152313410093057', '157606631293714432', '492601758003232788s'];
+var ONZINCHAT = '492600858081624064';
 
 var logger = winston.createLogger({
     level: 'debug',
@@ -95,7 +96,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 				}
 			break;
          }
-     } else if (message.toLowerCase().includes("permission")) {
+     } else if (message.toLowerCase().includes("permission") && channelID != ONZINCHAT) {
 		tag(PAUL, channelID);
 	 }
 });
