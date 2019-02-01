@@ -49,6 +49,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 					send_message_to_discord('It\'s not yet friday 16h! Drink water or something!', channelID);
 				}
 			break;
+			case 'slap':
+				send_raw_message_to_discord('_Slaps <@157606631293714432>_', channelID);
+				break;
+			case 'onzin':
+				send_raw_message_to_discord('***Not the <#' + ONZINCHAT + '>*** chat', channelID);
+				break;
 			case 'jira':
 				var action = args[0];
 				var ticket = args[1];
@@ -105,6 +111,13 @@ function send_message_to_discord(message_to_display, channelID) {
 	bot.sendMessage({
 		to:channelID,
 		message: '```' + message_to_display + '```'
+	});
+}
+
+function send_raw_message_to_discord(message_to_display, channelID) {
+	bot.sendMessage({
+		to:channelID,
+		message:  message_to_display
 	});
 }
 
