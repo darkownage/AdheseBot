@@ -96,7 +96,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 			break;
          }
      } else if (message.toLowerCase().includes("permission")) {
-		tag('492601218313748480', channelID);
+		tag(PAUL, channelID);
 	 }
 });
 
