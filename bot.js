@@ -4,6 +4,12 @@ var auth = require('./auth.json');
 
 var winston = require('winston');
 
+var PAUL = '492601218313748480';
+var BOBS = ['248152313410093057', '157606631293714432', '492601758003232788'];
+var ONZINCHAT = '492600858081624064';
+
+var TIME = {};
+
 var logger = winston.createLogger({
     level: 'debug',
     format: winston.format.combine(
@@ -26,6 +32,7 @@ bot.on('ready', function (evt) {
     logger.info(bot.username + ' - (' + bot.id + ')');
 });
 bot.on('message', function (user, userID, channelID, message, evt) {
+	logger.info(user + " " + userID + " " + channelID);
     // Our bot needs to know if it will execute a command
     // It will listen for messages that will start with `!`
     if (message.substring(0, 1) == '!') {
@@ -36,12 +43,30 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         switch(cmd) {
             case 'beer':
 				var today = new Date();
-				if ((today.getDay() == 5) && (today.getHours() >= 16)) {
+				if (BOBS.includes(userID)) {
+					send_message_to_discord('You don\'t even drink, who are you kidding?', channelID);
+				} else if ((today.getDay() == 5) && (today.getHours() >= 16)) {
 					send_message_to_discord('It\'s friday and it\'s after 16h, so the chances are that you could drink a beer and get away with it!', channelID);
 				} else {
 					send_message_to_discord('It\'s not yet friday 16h! Drink water or something!', channelID);
 				}
-            break;
+			break;
+			case 'slap':
+				send_raw_message_to_discord('_Slaps <@157606631293714432>_', channelID);
+				break;
+			case 'onzin':
+				send_raw_message_to_discord('***Not the <#' + ONZINCHAT + '>*** chat', channelID);
+				break;
+			case 'timer': 
+				if (TIME.user == undefined || TIME.user == null) {
+					TIME.user = new Date().getTime();
+					send_message_to_discord('Starting timer for ' + user, channelID);
+				} else {
+					var DELTA = new Date().getTime() - TIME.user;
+					TIME.user = null;
+					send_message_to_discord(DELTA + ' millies have passed for user ' + user, channelID);
+				}
+				break;
 			case 'jira':
 				var action = args[0];
 				var ticket = args[1];
@@ -89,12 +114,30 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 				}
 			break;
          }
-     }
+		} else if (message.toLowerCase().includes("permission") && channelID != ONZINCHAT) {
+			tag(PAUL, channelID);
+		} else if (message == '#suckstobeyou') {
+			send_message_to_discord('Haha', channelID);
+		}
 });
 
 function send_message_to_discord(message_to_display, channelID) {
 	bot.sendMessage({
 		to:channelID,
 		message: '```' + message_to_display + '```'
+	});
+}
+
+function send_raw_message_to_discord(message_to_display, channelID) {
+	bot.sendMessage({
+		to:channelID,
+		message:  message_to_display
+	});
+}
+
+function tag(userID, channelID) {
+	bot.sendMessage({
+		to:channelID,
+		message: '<@'+userID+'>'
 	});
 }
