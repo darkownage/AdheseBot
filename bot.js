@@ -1,4 +1,5 @@
 var Discord = require('discord.io');
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 var auth = require('./auth.json');
 
@@ -64,6 +65,31 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 				break;
 			case 'ping':
 				send_message_to_discord('pong', channelID);
+				break;
+			case 'fortune':
+				var Http = new XMLHttpRequest();
+				const url = 'http://yerkee.com/api/fortune';
+				Http.open("GET", url);
+				Http.send();
+				Http.onreadystatechange=(e)=> {
+					var text = Http == null? "" : Http.responseText;
+					text = text.substring(11, text.length - 1);
+					// Fuck this shit
+					text = text.replace("\\n\\t\\t", " ");
+					text = text.replace("\\t", " ");
+					text = text.replace("\\t", " ");
+					text = text.replace("\\t", " ");
+					text = text.replace("\\t", " ");
+					text = text.replace("\\n", " ");
+					text = text.replace("\\n", " ");
+					text = text.replace("\\n", " ");
+					text = text.replace("\\n", " ");
+					text = text.replace("\\\"", " ");
+					if (text.length > 0) {
+						send_message_to_discord(text, channelID);
+						Http = null;
+					}
+				}
 				break;
 			case 'spam':
 			var tot = 1000;
