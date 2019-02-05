@@ -10,7 +10,25 @@ var BOSS = '496641958970785792';
 var BOBS = ['248152313410093057', '157606631293714432', '492601758003232788'];
 var ONZINCHAT = '492600858081624064';
 
+var users = {};
+users['anthony'] = '248152313410093057';
+users['joren'] = '157606631293714432';
+users['kevin'] = '147779876567384064';
+users['kim'] = '489040911360196611';
+users['laurens'] = '492601758003232788';
+users['mateusz'] = '492601111476436993';
+users['paul'] = '492601218313748480';
+users['ron'] = '496217137996890112';
+users['sander'] = '461802589500211200';
+
+
+var images = {};
+images['emilia'] = 'images/emilia.png';
+images['counting'] = 'images/counting.png';
+images['onzin'] = 'images/nottheonzinchat.png';
+
 var TIME = {};
+var start = new Date().getTime();
 
 var logger = winston.createLogger({
     level: 'debug',
@@ -43,12 +61,13 @@ bot.on('message', function (user, userID, channelID, message, evt) {
        
         //args = args.splice(1);
         switch(cmd) {
+			case 'commands':
+				send_message_to_discord('!beer - to show if it\'s time for a beer\n!status - to see how long the bot has been running\n!slap <slappee> - to slap a user\n!jarvis - for fun\n!friet - for fun\n!fortune - ask Sander\n!...',channelID);
+				break;
             case 'beer':
 				var today = new Date();
-				if (args[1] == "ineedit") {
-					send_message_to_discord('If it\'s for medical purposes, you can drink as much as you need!', channelID);
-				} else if (BOBS.includes(userID)) {
-					send_message_to_discord('You don\'t even drink, who are you kidding?', channelID);
+				if (BOBS.includes(userID)) {
+					send_message_to_discord('I have identified you, ' + user + ' as a non-drinker, please drink a cola or something', channelID);
 				} else if (userID == BOSS) {
 					send_message_to_discord('You\'re the boss, you can drink whenever you want!', channelID);
 				} else if ((today.getDay() == 5) && (today.getHours() >= 14)) {
@@ -57,14 +76,23 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 					send_message_to_discord('It\'s not yet friday 16h! Drink water or something!', channelID);
 				}
 			break;
+			case 'status':
+				running = new Date().getTime() - start;
+				send_message_to_discord('I have been running for ' + running + 'ms', channelID);
+				break;
 			case 'slap':
-				send_raw_message_to_discord('_Slaps <@157606631293714432>_', channelID);
+				slappee= args[1];
+				if (slappee.toLowerCase() in users) {
+					send_raw_message_to_discord('I have been asked by ' + user + ' to slap <@' + users[slappee.toLowerCase()] + '>', channelID);
+				} else {
+					send_message_to_discord('I have been asked to slap an unknown user, possible slappees are: ' + users.keys(), channelID);
+				}
+				break;
+			case 'jarvis':
+				send_message_to_discord(user + ', did you summon me?',channelID);
 				break;
 			case 'friet':
-				send_message_to_discord('again?', channelID);
-				break;
-			case 'ping':
-				send_message_to_discord('pong', channelID);
+				send_message_to_discord('A wise man once said: "a frietje a day keeps the doctor away", so enjoy it!', channelID);
 				break;
 			case 'fortune':
 				var Http = new XMLHttpRequest();
@@ -91,18 +119,19 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 					}
 				}
 				break;
-			case 'spam':
-			var tot = 1000;
-				if (args[1] != undefined && args[1] != null) {
-					tot = parseInt(args[1]);
-				}
-				for (var i = 0; i < tot; i++) {
-					send_raw_message_to_discord('Sorry <@' + userID + '> made me do it :\'(', channelID);
+			case 'onzin':
+				post_image(images['onzin'], channelID);
+				break;
+			case 'image':
+				category = args[1].toLowerCase();
+				if (category in images) {
+					post_image(images[category], channelID);
+				} else {
+					send_message_to_discord('File not found',channelID);
 				}
 				break;
-
-			case 'onzin':
-				send_raw_message_to_discord('***Not the <#' + ONZINCHAT + '> chat***', channelID);
+			case 'dance':
+				post_gif('https://media.giphy.com/media/qNnQAESrblfDG/giphy.gif', channelID);
 				break;
 			case 'timer': 
 				if (TIME.user == undefined || TIME.user == null) {
@@ -114,52 +143,6 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 					send_message_to_discord(DELTA + ' millies have passed for user ' + user, channelID);
 				}
 				break;
-			case 'jira':
-				var action = args[0];
-				var ticket = args[1];
-				
-				switch(action) {
-					case 'to_do':
-					case 'td':
-						if (args.length == 2) {
-							var base_url = 'http://jira.adhese.org/rest/api/latest/issue/AD-' + ticket;
-							logger.info('base_url is ' + base_url);
-							send_message_to_discord('Moving ticket #' + ticket + ' to to_do status!', channelID);
-						}
-					break;
-					case 'in_progress':
-					case 'ip':
-						send_message_to_discord('Moving ticket #' + ticket + ' to in_progress status!', channelID);
-					break;
-					case 'code_review':
-					case 'cr':
-						send_message_to_discord('Moving ticket #' + ticket + ' to code_review status!', channelID);
-					break;
-					case 'functional_review':
-					case 'fr':
-						send_message_to_discord('Moving ticket #' + ticket + ' to functional_review status!', channelID);
-					break;
-					case 'assign':
-						var assignee = args[2];
-						var json = '{"fields": {"assignee":{"name":"' + assignee + '"}}}';
-						send_message_to_discord('Assigning ticket #' + ticket + ' to ' + assignee + '!', channelID);
-					break;
-					case 'done':
-						send_message_to_discord('Moving ticket #' + ticket + ' to done status!', channelID);
-					break;
-					case 'help':
-						send_message_to_discord('Possible commands:\n!jira to_do <ticket_number>: moves ticket to to_do status\n'
-							+ '!jira in_progress <ticket_number>: moves ticket to in_progress status\n'
-							+ '!jira code_review <ticket_number>: moves ticket to code_review status\n'
-							+ '!jira functional_review <ticket_number>: moves ticket to functional_review status\n'
-							+ '!jira assign <ticket_number> <assignee>: assigns ticket to assignee\n'
-							+ '!jira done <ticket_number>: moves ticket to done status', channelID);
-					break;
-					default:
-						send_message_to_discord('I do not recognize your command: ' + action + ' ; Type !jira help to see a list of possible commands', channelID);
-					break;
-				}
-			break;
          }
 		} else if (message.toLowerCase().includes("permission") && channelID != ONZINCHAT) {
 			tag(PAUL, channelID);
@@ -167,6 +150,32 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 			send_message_to_discord('Haha', channelID);
 		}
 });
+
+function post_gif(link, channelID) {
+	bot.sendMessage({
+	  to: channelID,
+	  message: '', // You can also send a message with the embed.
+	  embed: {
+		color: 6826080,
+		footer: { 
+		  text: ''
+		},
+		thumbnail:
+		{
+		  url: link
+		},
+		title: '',
+		url: link
+	  }
+	});
+}
+
+function post_image(file, channelID) {
+	bot.uploadFile({
+		to: channelID,
+		file: file
+	});
+}
 
 function send_message_to_discord(message_to_display, channelID) {
 	bot.sendMessage({
