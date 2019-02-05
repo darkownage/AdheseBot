@@ -62,6 +62,19 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 			case 'friet':
 				send_message_to_discord('again?', channelID);
 				break;
+			case 'ping':
+				send_message_to_discord('pong', channelID);
+				break;
+			case 'spam':
+			var tot = 1000;
+				if (args[1] != undefined && args[1] != null) {
+					tot = parseInt(args[1]);
+				}
+				for (var i = 0; i < tot; i++) {
+					send_raw_message_to_discord('Sorry <@' + userID + '> made me do it :\'(', channelID);
+				}
+				break;
+
 			case 'onzin':
 				send_raw_message_to_discord('***Not the <#' + ONZINCHAT + '> chat***', channelID);
 				break;
