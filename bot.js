@@ -5,6 +5,7 @@ var auth = require('./auth.json');
 var winston = require('winston');
 
 var PAUL = '492601218313748480';
+var BOSS = '496641958970785792';
 var BOBS = ['248152313410093057', '157606631293714432', '492601758003232788'];
 var ONZINCHAT = '492600858081624064';
 
@@ -39,13 +40,17 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         var args = message.substring(1).split(' ');
         var cmd = args[0];
        
-        args = args.splice(1);
+        //args = args.splice(1);
         switch(cmd) {
             case 'beer':
 				var today = new Date();
-				if (BOBS.includes(userID)) {
+				if (args[1] == "ineedit") {
+					send_message_to_discord('If it\'s for medical purposes, you can drink as much as you need!', channelID);
+				} else if (BOBS.includes(userID)) {
 					send_message_to_discord('You don\'t even drink, who are you kidding?', channelID);
-				} else if ((today.getDay() == 5) && (today.getHours() >= 16)) {
+				} else if (userID == BOSS) {
+					send_message_to_discord('You\'re the boss, you can drink whenever you want!', channelID);
+				} else if ((today.getDay() == 5) && (today.getHours() >= 14)) {
 					send_message_to_discord('It\'s friday and it\'s after 16h, so the chances are that you could drink a beer and get away with it!', channelID);
 				} else {
 					send_message_to_discord('It\'s not yet friday 16h! Drink water or something!', channelID);
@@ -54,8 +59,11 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 			case 'slap':
 				send_raw_message_to_discord('_Slaps <@157606631293714432>_', channelID);
 				break;
+			case 'friet':
+				send_message_to_discord('again?', channelID);
+				break;
 			case 'onzin':
-				send_raw_message_to_discord('***Not the <#' + ONZINCHAT + '>*** chat', channelID);
+				send_raw_message_to_discord('***Not the <#' + ONZINCHAT + '> chat***', channelID);
 				break;
 			case 'timer': 
 				if (TIME.user == undefined || TIME.user == null) {
